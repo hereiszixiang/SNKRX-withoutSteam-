@@ -1,5 +1,6 @@
 
 
+<<<<<<< HEAD
 
 # 注释了全部的steam字段, 将文件夹拖拽到 engine\love\love.exe 可直接打开 
 
