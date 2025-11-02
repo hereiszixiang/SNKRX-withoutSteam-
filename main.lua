@@ -2136,6 +2136,7 @@ end
 
 
 function love.run()
+  print("main.lua: love.run()")
   return engine_run({
     game_name = 'SNKRX',
     window_width = 'max',

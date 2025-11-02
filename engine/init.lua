@@ -1,4 +1,5 @@
 local path = ...
+print("init.lua:engine is called")
 if not path:find("init") then
   require(path .. ".datastructures.string")
   require(path .. ".datastructures.table")
@@ -45,7 +46,8 @@ end
 
 function engine_run(config)
   if not web then
-    love.filesystem.setIdentity(config.game_name)
+    print("init.lua:not web")
+    love.filesystem.setIdentity(config.game_name) -- 设置文件保存位置
     -- steam.init()
     system.load_state()
 
@@ -60,21 +62,22 @@ function engine_run(config)
     if config.msaa ~= 'max' then msaa = config.msaa end
     if config.anisotropy ~= 'max' then anisotropy = config.anisotropy end
 
-    gw, gh = config.game_width or 480, config.game_height or 270
-    sx, sy = window_width/(config.game_width or 480), window_height/(config.game_height or 270)
+    gw, gh = config.game_width or 480, config.game_height or 270                                -- 16:9 游戏的实际像素比例,实现真像素
+    sx, sy = window_width / (config.game_width or 480), window_height / (config.game_height or 270) -- 缩放倍数倍数
     ww, wh = window_width, window_height
 
     if state.sx and state.sy then
       sx, sy = state.sx, state.sy
-      love.window.setMode(state.sx*gw, state.sy*gh, {vsync = config.vsync, msaa = msaa or 0, display = config.display})
+      love.window.setMode(state.sx * gw, state.sy * gh,
+        { vsync = config.vsync, msaa = msaa or 0, display = config.display })
     else
       state.sx, state.sy = sx, sy
-      love.window.setMode(window_width, window_height, {vsync = config.vsync, msaa = msaa or 0, display = config.display})
+      love.window.setMode(window_width, window_height, { vsync = config.vsync, msaa = msaa or 0, display = config
+      .display })
     end
     love.window.setTitle(config.game_name)
-
   else
-    gw, gh = config.game_width or 480, config.game_height or 270 
+    gw, gh = config.game_width or 480, config.game_height or 270
     sx, sy = 2, 2
     ww, wh = 960, 540
   end
@@ -95,7 +98,7 @@ function engine_run(config)
   for k, v in pairs(config.input or {}) do input:bind(k, v) end
   random = Random()
   trigger = Trigger()
-  camera = Camera(gw/2, gh/2)
+  camera = Camera(gw / 2, gh / 2)
   mouse = Vector(0, 0)
   last_mouse = Vector(0, 0)
   mouse_dt = Vector(0, 0)
@@ -105,15 +108,20 @@ function engine_run(config)
 
   if not web then
     _, _, flags = love.window.getMode()
-    fixed_dt = 1/flags.refreshrate
-  else fixed_dt = 1/60 end
+    fixed_dt = 1 / flags.refreshrate
+  else
+    fixed_dt = 1 / 60
+  end
 
   local accumulator = fixed_dt
   local dt = 0
   frame, time = 0, 0
 
-  if not web then refresh_rate = flags.refreshrate
-  else refresh_rate = 60 end
+  if not web then
+    refresh_rate = flags.refreshrate
+  else
+    refresh_rate = 60
+  end
 
   return function()
     if love.event then
@@ -131,16 +139,27 @@ function engine_run(config)
             if not a then open_options(main.current)
             else close_options(main.current) end
           end
-          ]]--
-        elseif name == "keypressed" then input.keyboard_state[a] = true; input.last_key_pressed = a
-        elseif name == "keyreleased" then input.keyboard_state[a] = false
-        elseif name == "mousepressed" then input.mouse_state[input.mouse_buttons[c]] = true; input.last_key_pressed = input.mouse_buttons[c]
-        elseif name == "mousereleased" then input.mouse_state[input.mouse_buttons[c]] = false
-        elseif name == "wheelmoved" then if b == 1 then input.mouse_state.wheel_up = true elseif b == -1 then input.mouse_state.wheel_down = true end
-        elseif name == "gamepadpressed" then input.gamepad_state[input.index_to_gamepad_button[b]] = true; input.last_key_pressed = input.index_to_gamepad_button[b]
-        elseif name == "gamepadreleased" then input.gamepad_state[input.index_to_gamepad_button[b]] = false
-        elseif name == "gamepadaxis" then input.gamepad_axis[input.index_to_gamepad_axis[b]] = c
-        elseif name == "textinput" then input:textinput(a) end
+          ]] --
+        elseif name == "keypressed" then
+          input.keyboard_state[a] = true; input.last_key_pressed = a
+        elseif name == "keyreleased" then
+          input.keyboard_state[a] = false
+        elseif name == "mousepressed" then
+          input.mouse_state[input.mouse_buttons[c]] = true; input.last_key_pressed = input.mouse_buttons[c]
+        elseif name == "mousereleased" then
+          input.mouse_state[input.mouse_buttons[c]] = false
+        elseif name == "wheelmoved" then
+          if b == 1 then input.mouse_state.wheel_up = true elseif b == -1 then input.mouse_state.wheel_down = true end
+        elseif name == "gamepadpressed" then
+          input.gamepad_state[input.index_to_gamepad_button[b]] = true; input.last_key_pressed = input
+          .index_to_gamepad_button[b]
+        elseif name == "gamepadreleased" then
+          input.gamepad_state[input.index_to_gamepad_button[b]] = false
+        elseif name == "gamepadaxis" then
+          input.gamepad_axis[input.index_to_gamepad_axis[b]] = c
+        elseif name == "textinput" then
+          input:textinput(a)
+        end
       end
     end
 
@@ -148,13 +167,15 @@ function engine_run(config)
 
     -- steam.runCallbacks()
     accumulator = accumulator + dt
+    print("accumulator" .. accumulator)
     while accumulator >= fixed_dt do
+      print("frame" .. frame)
       frame = frame + 1
       input:update(fixed_dt)
       trigger:update(fixed_dt)
       camera:update(fixed_dt)
       local mx, my = love.mouse.getPosition()
-      mouse:set(mx/sx, my/sy)
+      mouse:set(mx / sx, my / sy)
       mouse_dt:set(mouse.x - last_mouse.x, mouse.y - last_mouse.y)
       update(fixed_dt)
       system.update()
