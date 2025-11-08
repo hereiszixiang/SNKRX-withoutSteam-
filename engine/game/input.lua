@@ -1,5 +1,7 @@
+-- 封装了键盘、鼠标和手柄的输入状态，并支持“动作绑定”机制。它通过统一的接口检测按键的按下、持续按住和释放状态
 Input = Object:extend()
 function Input:init(joystick_index)
+  print("input.lua:Input:init is called")
   self.mouse_buttons = {"m1", "m2", "m3", "m4", "m5", "wheel_up", "wheel_down"}
   self.gamepad_buttons = {"fdown", "fup", "fleft", "fright", "dpdown", "dpup", "dpleft", "dpright", "start", "back", "guide", "leftstick", "rightstick", "rb", "lb"}
   self.index_to_gamepad_button = {["a"] = "fdown", ["b"] = "fright", ["x"] = "fleft", ["y"] = "fup", ["back"] = "back", ["start"] = "start", ["guide"] = "guide", ["leftstick"] = "leftstick",
@@ -21,17 +23,25 @@ end
 
 
 function Input:update(dt)
+  -- print("Input:update called")
   for _, action in ipairs(self.actions) do
     self[action].pressed = false
     self[action].down = false
     self[action].released = false
   end
 
+  -- 通过外部控制mouse_state，previous_mouse_state来确定一个键有没有被按下
+  -- 遍历action表，这里不需要索引因为是insert进来的，索引没有价值
   for _, action in ipairs(self.actions) do
-    for _, key in ipairs(self[action].keys) do
+    -- 遍历绑定的keys
+        for _, key in ipairs(self[action].keys) do
+      -- 判断表中是否有相应的key
       if table.contains(self.mouse_buttons, key) then
+        -- 第一层的for中已经按下 or 当前state 为true 上一次state为false 代表第一次被按下
         self[action].pressed = self[action].pressed or (self.mouse_state[key] and not self.previous_mouse_state[key])
+        -- 代表key处于按下的状态
         self[action].down = self[action].down or self.mouse_state[key]
+        -- 代表第一次被释放
         self[action].released = self[action].released or (not self.mouse_state[key] and  self.previous_mouse_state[key])
       elseif table.contains(self.gamepad_buttons, key) then
         self[action].pressed = self[action].pressed or (self.gamepad_state[key] and not self.previous_gamepad_state[key])
@@ -62,7 +72,10 @@ function Input:set_mouse_visible(v)
   love.mouse.setVisible(v)
 end
 
-
+-- 把一个（或多个）按键“绑定”到一个“动作”上
+-- 在 self表中添加一个key为action 的表，这个表有一个 key为keys，这个keys的值为绑定的键位
+-- 这个action表还有 pressed release down 三个key， 值为bool
+-- action 动作 keys 可以是string or table
 function Input:bind(action, keys)
   if not self[action] then self[action] = {} end
   if type(keys) == "string" then self[action].keys = {keys}

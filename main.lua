@@ -12,10 +12,13 @@ require 'media'
 function init()
   shared_init()
 
+  --#region input bind
   input:bind('move_left', {'a', 'left', 'dpleft', 'm1'})
   input:bind('move_right', {'d', 'e', 's', 'right', 'dpright', 'm2'})
   input:bind('enter', {'space', 'return', 'fleft', 'fdown', 'fright'})
+  --#endregion
 
+  --#region sound
   local s = {tags = {sfx}}
   artificer1 = Sound('458586__inspectorj__ui-mechanical-notification-01-fx.ogg', s)
   explosion1 = Sound('Explosion Grenade_04.ogg', s)
@@ -124,7 +127,9 @@ function init()
   song4 = Sound('Kubbi - Ember - 04 Cascade.ogg', {tags = {music}})
   song5 = Sound('Kubbi - Ember - 05 Compass.ogg', {tags = {music}})
   death_song = Sound('Kubbi - Ember - 09 Formed by Glaciers.ogg', {tags = {music}})
+  --#endregion
 
+  --#region images
   lock_image = Image('lock')
   speed_booster_elite = Image('speed_booster_elite')
   exploder_elite = Image('exploder_elite')
@@ -233,6 +238,7 @@ function init()
   psycholeak = Image('psycholeak')
   divine_blessing = Image('divine_blessing')
   hardening = Image('hardening')
+  --#endregion
 
   class_colors = {
     ['warrior'] = yellow[0],
@@ -1808,7 +1814,9 @@ function update(dt)
   end
   ]]--
 
+  -- k 键按下后缩小画面比例
   if input.k.pressed then
+    print("k pressed")
     if sx > 1 and sy > 1 then
       sx, sy = sx - 0.5, sy - 0.5
       love.window.setMode(480*sx, 270*sy)
@@ -1817,7 +1825,9 @@ function update(dt)
     end
   end
 
+  -- l 键按下后放大画面比例
   if input.l.pressed then
+    print("l pressed")
     sx, sy = sx + 0.5, sy + 0.5
     love.window.setMode(480*sx, 270*sy)
     state.sx, state.sy = sx, sy

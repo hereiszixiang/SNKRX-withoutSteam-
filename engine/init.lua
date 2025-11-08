@@ -124,6 +124,7 @@ function engine_run(config)
   end
 
   return function()
+    -- 事件的自定义处理方式
     if love.event then
       love.event.pump()
       for name, a, b, c, d, e, f in love.event.poll() do
@@ -167,9 +168,9 @@ function engine_run(config)
 
     -- steam.runCallbacks()
     accumulator = accumulator + dt
-    print("accumulator" .. accumulator)
+    -- print("accumulator" .. accumulator)
     while accumulator >= fixed_dt do
-      print("frame" .. frame)
+      -- print("frame" .. frame)
       frame = frame + 1
       input:update(fixed_dt)
       trigger:update(fixed_dt)
