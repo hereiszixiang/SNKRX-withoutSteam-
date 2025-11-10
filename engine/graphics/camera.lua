@@ -4,8 +4,11 @@ function Shake:init(amplitude, duration, frequency)
   self.duration = duration or 0
   self.frequency = frequency or 60
   self.samples = {}
+  -- 根据duration秒数生成-1,1之间的若干采样点
   for i = 1, (duration/1000)*frequency do self.samples[i] = 2*love.math.random()-1 end
+  -- 记录引擎开始至今的时间,转化为毫秒
   self.ti = love.timer.getTime()*1000
+  -- 开始shake的时间
   self.t = 0
   self.shaking = true
 end
@@ -13,6 +16,7 @@ end
 
 function Shake:update(dt)
   self.t = love.timer.getTime()*1000 - self.ti
+  -- 若当前时间-开始时间>持续时间,视为shake结束
   if self.t > self.duration then
     self.shaking = false
   end
@@ -23,22 +27,27 @@ function Shake:get_noise(s)
   return self.samples[s] or 0
 end
 
-
+-- 剩余时间占据shake时间的比例
 function Shake:get_decay(t)
   if t > self.duration then return end
   return (self.duration - t)/self.duration
 end
 
-
+-- 计算瞬时振幅
 function Shake:get_amplitude(t)
   if not t then
+    -- 若不在shaking 返回0
     if not self.shaking then return 0 end
     t = self.t
   end
+  -- t 毫秒→秒，再乘采样率 → 采样坐标（带小数）
   local s = (t/1000)*self.frequency
   local s0 = math.floor(s)
+  -- 下一个整数坐标
   local s1 = s0 + 1
+  -- 衰减系数 1,0
   local k = self:get_decay(t)
+  -- 基础振幅 * ( 采样值1 + 小数权重*差值 ) * 衰减
   return self.amplitude*(self:get_noise(s0) + (s-s0)*(self:get_noise(s1) - self:get_noise(s0)))*k
 end
 
